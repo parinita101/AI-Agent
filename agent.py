@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -10,16 +9,16 @@ if not OPENAI_API_KEY:
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-
-from langchain_community.document_loaders import TextLoader  # or langchain_community.document_loaders if needed
-from text_splitter import RecursiveCharacterTextSplitter  # Your custom splitter module
+from langchain_community.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import FakeEmbeddings
 from langchain_community.chat_models import ChatOpenAI
-from langchain_community.chains import RetrievalQA
+from langchain.chains import RetrievalQA
 
 from intents import detect_intent
 from tools import mock_lead_capture
+
 
 # Load knowledge base file
 loader = TextLoader("rag/knowledge_base.md")
@@ -30,7 +29,10 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs = text_splitter.split_documents(documents)
 
 # Create vectorstore from document chunks
-vectorstore = FAISS.from_documents(docs, OpenAIEmbeddings())
+vectorstore = FAISS.from_documents(
+    docs,
+    FakeEmbeddings(size=1536)
+)
 retriever = vectorstore.as_retriever()
 
 # Initialize chat language model
